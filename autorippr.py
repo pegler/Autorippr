@@ -168,9 +168,6 @@ def rip(config):
                         status = mkv_api.rip_disc(mkv_save_path)
 
                     if status:
-                        if config['makemkv']['eject']:
-                            eject(config, dvd['location'])
-
                         log.info("It took %s minute(s) to complete the ripping of %s" %
                                 (t.minutes, movie_title)
                                 )
@@ -194,6 +191,9 @@ def rip(config):
 
             else:
                 log.info("Movie folder %s already exists" % movie_title)
+
+            if config['makemkv']['eject']:
+                eject(config, dvd['location'])
 
     else:
         log.info("Could not find any DVDs in drive list")
