@@ -56,16 +56,16 @@ import yaml
 import subprocess
 import tempfile
 from classes import *
-from lockfile import LockFile
+from lockfile import LockFile, LockError
 
 __version__ = "1.6.3"
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 CONFIG_FILE = "%s/settings.cfg" % DIR
 
-RIP_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_rip.lock'))
-COMPRESS_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_compress.lock'))
-EXTRA_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_extra.lock'))
+RIP_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_rip.lock'), timeout=1)
+COMPRESS_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_compress.lock'), timeout=1)
+EXTRA_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_extra.lock'), timeout=1)
 
 
 def eject(config, drive):
@@ -336,13 +336,22 @@ if __name__ == '__main__':
         testing.perform_testing(config)
 
     if arguments['--rip'] or arguments['--all']:
-        with RIP_LOCK:
-            rip(config)
+        try:
+            with RIP_LOCK:
+                rip(config)
+        except LockError:
+            pass
 
     if arguments['--compress'] or arguments['--all']:
-        with COMPRESS_LOCK:
-            compress(config)
+        try:
+            with COMPRESS_LOCK:
+                compress(config)
+        except LockError:
+            pass
 
     if arguments['--extra'] or arguments['--all']:
-        with EXTRA_LOCK:
-            extras(config)
+        try:
+            with EXTRA_LOCK:
+                extras(config)
+        except LockError:
+            pass
