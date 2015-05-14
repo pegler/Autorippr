@@ -54,6 +54,7 @@ import os
 import sys
 import yaml
 import subprocess
+import tempfile
 from classes import *
 from lockfile import LockFile
 
