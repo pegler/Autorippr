@@ -55,13 +55,16 @@ import sys
 import yaml
 import subprocess
 from classes import *
-from tendo import singleton
+from lockfile import LockFile
 
 __version__ = "1.6.3"
 
-me = singleton.SingleInstance()
 DIR = os.path.dirname(os.path.realpath(__file__))
 CONFIG_FILE = "%s/settings.cfg" % DIR
+
+RIP_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_rip.lock'))
+COMPRESS_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_compress.lock'))
+EXTRA_LOCK = LockFile(os.path.normpath(tempfile.gettempdir() + '/autorippr_extra.lock'))
 
 
 def eject(config, drive):
@@ -332,10 +335,13 @@ if __name__ == '__main__':
         testing.perform_testing(config)
 
     if arguments['--rip'] or arguments['--all']:
-        rip(config)
+        with RIP_LOCK:
+            rip(config)
 
     if arguments['--compress'] or arguments['--all']:
-        compress(config)
+        with COMPRESS_LOCK:
+            compress(config)
 
     if arguments['--extra'] or arguments['--all']:
-        extras(config)
+        with EXTRA_LOCK:
+            extras(config)
